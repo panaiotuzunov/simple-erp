@@ -30,7 +30,7 @@ func main() {
 		Addr:    ":8080",
 	}
 	mux.Handle("/", http.FileServer(http.Dir("./")))
-	mux.HandleFunc("GET /test/", cfg.Test)
+	mux.HandleFunc("POST /api/entrance-receipts/", cfg.HandlerCreateEntranceReceipt)
 	log.Print("Server is running")
 	server.ListenAndServe()
 }
