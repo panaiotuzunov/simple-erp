@@ -12,3 +12,7 @@ VALUES (
     $5
 )
 RETURNING *;
+
+-- name: GetAllEntranceReceipts :many
+SELECT * FROM entrance_receipts;
+

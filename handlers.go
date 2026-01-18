@@ -27,7 +27,7 @@ func (cfg *apiConfig) HandlerCreateEntranceReceipt(writer http.ResponseWriter, r
 	}
 	decoder := json.NewDecoder(req.Body)
 	if err := decoder.Decode(&requestData); err != nil {
-		log.Printf("Error decoding JSON: %s", err)
+		log.Printf("Error decoding JSON: %v", err)
 		writeErrorResponse(writer, http.StatusBadRequest, "Error decoding JSON")
 		return
 	}
@@ -43,9 +43,23 @@ func (cfg *apiConfig) HandlerCreateEntranceReceipt(writer http.ResponseWriter, r
 		GrainType:  requestData.GrainType,
 	})
 	if err != nil {
-		log.Printf("Error creating entrance receipt: %s", err)
+		log.Printf("Error creating entrance receipt: %v", err)
 		writeErrorResponse(writer, http.StatusInternalServerError, "Error creating entrance receipt")
 		return
 	}
 	writeJSONResponse(writer, http.StatusCreated, receipt)
+}
+
+func (cfg *apiConfig) HandlerGetAllEntranceReceipts(writer http.ResponseWriter, req *http.Request) {
+	receipts, err := cfg.db.GetAllEntranceReceipts(req.Context())
+	if err != nil {
+		log.Printf("DB error - %v", err)
+		writeErrorResponse(writer, http.StatusInternalServerError, "DB error")
+		return
+	}
+	if len(receipts) == 0 {
+		writeJSONResponse(writer, http.StatusOK, []database.EntranceReceipt{})
+		return
+	}
+	writeJSONResponse(writer, http.StatusOK, receipts)
 }
