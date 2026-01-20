@@ -1,7 +1,5 @@
 -- +goose Up
-CREATE SEQUENCE receipt_id_seq START WITH 1;
-
-CREATE TABLE entrance_receipts (
+CREATE TABLE exit_receipts (
     id INT PRIMARY KEY DEFAULT nextval('receipt_id_seq'),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
@@ -13,4 +11,4 @@ CREATE TABLE entrance_receipts (
 );
 
 -- +goose Down
-DROP TABLE entrance_receipts;
+DROP TABLE exit_receipts;

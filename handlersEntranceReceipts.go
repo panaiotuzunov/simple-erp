@@ -11,14 +11,6 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var grainTypes = map[string]struct{}{
-	"wheat":     {},
-	"barley":    {},
-	"corn":      {},
-	"sunflower": {},
-	"canola":    {},
-}
-
 func (cfg *apiConfig) HandlerCreateEntranceReceipt(writer http.ResponseWriter, req *http.Request) {
 	var requestData struct {
 		TruckReg   string          `json:"truck_reg"`
