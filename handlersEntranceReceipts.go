@@ -37,8 +37,8 @@ func (cfg *apiConfig) HandlerCreateEntranceReceipt(writer http.ResponseWriter, r
 		GrainType:  requestData.GrainType,
 	})
 	if err != nil {
-		log.Printf("Error creating entrance receipt: %v", err)
-		writeErrorResponse(writer, http.StatusInternalServerError, "Error creating entrance receipt")
+		log.Printf("Error creating receipt: %v", err)
+		writeErrorResponse(writer, http.StatusInternalServerError, "Error creating receipt")
 		return
 	}
 	writeJSONResponse(writer, http.StatusCreated, receipt)
@@ -61,6 +61,7 @@ func (cfg *apiConfig) HandlerGetAllEntranceReceipts(writer http.ResponseWriter, 
 func (cfg *apiConfig) HandlerGetEntranceReceiptByID(writer http.ResponseWriter, req *http.Request) {
 	id, err := strconv.Atoi(req.PathValue("receiptID"))
 	if err != nil {
+		log.Printf("Error converting id str to int: %v", err)
 		writeErrorResponse(writer, http.StatusBadRequest, "error converting id string to int")
 		return
 	}
@@ -70,6 +71,7 @@ func (cfg *apiConfig) HandlerGetEntranceReceiptByID(writer http.ResponseWriter, 
 			writeErrorResponse(writer, http.StatusNotFound, "Not found")
 			return
 		}
+		log.Printf("Error fetching receipt by id: %v", err)
 		writeErrorResponse(writer, http.StatusInternalServerError, "DB error")
 		return
 	}
