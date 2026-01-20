@@ -32,6 +32,7 @@ func main() {
 	mux.Handle("/", http.FileServer(http.Dir("./")))
 	mux.HandleFunc("POST /api/entrance-receipts/", cfg.HandlerCreateEntranceReceipt)
 	mux.HandleFunc("GET /api/entrance-receipts/", cfg.HandlerGetAllEntranceReceipts)
+	mux.HandleFunc("GET /api/entrance-receipts/{receiptID}", cfg.HandlerGetEntranceReceiptByID)
 	log.Print("Server is running")
 	server.ListenAndServe()
 }

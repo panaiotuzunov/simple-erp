@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 	"simple-erp/internal/database"
+	"strconv"
 
 	"github.com/shopspring/decimal"
 )
@@ -62,4 +64,22 @@ func (cfg *apiConfig) HandlerGetAllEntranceReceipts(writer http.ResponseWriter, 
 		return
 	}
 	writeJSONResponse(writer, http.StatusOK, receipts)
+}
+
+func (cfg *apiConfig) HandlerGetEntranceReceiptByID(writer http.ResponseWriter, req *http.Request) {
+	id, err := strconv.Atoi(req.PathValue("receiptID"))
+	if err != nil {
+		writeErrorResponse(writer, http.StatusBadRequest, "error converting id string to int")
+		return
+	}
+	receipt, err := cfg.db.GetEntranceReceiptByID(req.Context(), int32(id))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			writeErrorResponse(writer, http.StatusNotFound, "Not found")
+			return
+		}
+		writeErrorResponse(writer, http.StatusInternalServerError, "DB error")
+		return
+	}
+	writeJSONResponse(writer, http.StatusOK, receipt)
 }

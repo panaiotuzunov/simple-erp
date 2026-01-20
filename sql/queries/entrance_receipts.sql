@@ -16,3 +16,9 @@ RETURNING *;
 -- name: GetAllEntranceReceipts :many
 SELECT * FROM entrance_receipts;
 
+-- name: GetEntranceReceiptByID :one
+SELECT * FROM entrance_receipts
+WHERE id = $1;
+
+
+
