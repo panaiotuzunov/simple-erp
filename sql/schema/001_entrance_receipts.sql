@@ -14,3 +14,4 @@ CREATE TABLE entrance_receipts (
 
 -- +goose Down
 DROP TABLE entrance_receipts;
+DROP SEQUENCE receipt_id_seq;

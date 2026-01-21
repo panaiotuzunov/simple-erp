@@ -11,13 +11,15 @@ VALUES (
     $4,
     $5
 )
-RETURNING *;
+RETURNING *, (gross - tare)::NUMERIC(12,3) AS net;
 
 -- name: GetAllExitReceipts :many
-SELECT * FROM exit_receipts;
+SELECT *, (gross - tare)::NUMERIC(12,3) AS net
+FROM exit_receipts;
 
 -- name: GetExitReceiptByID :one
-SELECT * FROM exit_receipts
+SELECT *, (gross - tare)::NUMERIC(12,3) AS net 
+FROM exit_receipts
 WHERE id = $1;
 
 
