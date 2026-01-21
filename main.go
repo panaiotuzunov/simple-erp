@@ -39,7 +39,8 @@ func main() {
 	mux.HandleFunc("POST /api/exit-receipts/", cfg.HandlerCreateExitReceipt)
 	mux.HandleFunc("GET /api/exit-receipts/", cfg.HandlerGetAllExitReceipts)
 	mux.HandleFunc("GET /api/exit-receipts/{receiptID}", cfg.HandlerGetExitReceiptByID)
-
+	// reports endpoint
+	mux.HandleFunc("GET /api/reports/movements", cfg.HandlerReportMovements)
 	log.Print("Server is running")
 	server.ListenAndServe()
 }
