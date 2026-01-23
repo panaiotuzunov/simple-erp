@@ -42,7 +42,9 @@ func main() {
 	// purchases endpoint
 	mux.HandleFunc("POST /api/purchases/", cfg.HandlerCreatePurchase)
 	// reports endpoint
-	mux.HandleFunc("GET /api/reports/movements", cfg.HandlerReportMovements)
+	mux.HandleFunc("GET /api/reports/movements/", cfg.HandlerReportMovements)
+	mux.HandleFunc("GET /api/reports/inventory/", cfg.HandlerReportInventory)
+
 	log.Print("Server is running")
 	server.ListenAndServe()
 }

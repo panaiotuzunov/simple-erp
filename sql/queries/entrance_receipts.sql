@@ -15,8 +15,12 @@ VALUES (
 RETURNING *, (gross - tare)::NUMERIC(12,3) AS net;
 
 -- name: GetAllEntranceReceipts :many
-SELECT *, (gross - tare)::NUMERIC(12,3) AS net
-FROM entrance_receipts;
+SELECT e.*,
+    (e.gross - e.tare)::NUMERIC(12,3) AS net,
+    p.suplier AS suplier
+FROM entrance_receipts e
+INNER JOIN purchases p
+ON e.purchase_id = p.id;
 
 -- name: GetEntranceReceiptByID :one
 SELECT *, (gross - tare)::NUMERIC(12,3) AS net 

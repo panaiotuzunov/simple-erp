@@ -20,3 +20,19 @@ SELECT
     'exit' AS receipt_type 
 FROM exit_receipts
 ORDER BY id;
+
+-- name: GetInventory :many
+WITH combined_movements AS (
+    SELECT grain_type, (gross - tare) AS net
+    FROM entrance_receipts
+    
+    UNION ALL
+    
+    SELECT grain_type, -(gross - tare) AS net
+    FROM exit_receipts
+)
+SELECT 
+    grain_type, 
+    SUM(net)::NUMERIC(12, 3) AS net_inventory
+FROM combined_movements
+GROUP BY grain_type;
