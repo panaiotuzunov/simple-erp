@@ -1,9 +1,20 @@
 -- name: GetAllReceiptsUnion :many
 SELECT 
-    *,
-    (gross - tare)::NUMERIC(12,3) AS net,
-    'entrance' AS receipt_type 
-FROM entrance_receipts
+    e.id,
+    e.created_at,
+    e.updated_at,
+    e.truck_reg,
+    e.trailer_reg,
+    e.gross,
+    e.tare,
+    e.grain_type,
+    (e.gross - e.tare)::NUMERIC(12,3) AS net,
+    'entrance' AS receipt_type,
+    e.purchase_id AS purchase_id,
+    p.suplier
+FROM entrance_receipts e
+INNER JOIN purchases p
+ON e.purchase_id = p.id
 
 UNION ALL
 
@@ -16,8 +27,10 @@ SELECT
     (gross * -1)::NUMERIC(12,3) AS gross,
     (tare * -1)::NUMERIC(12,3) AS tare,
     grain_type,
-    ((gross - tare) * -1)::NUMERIC(12,3) AS net,
-    'exit' AS receipt_type 
+    -(gross - tare)::NUMERIC(12,3) AS net,
+    'exit' AS receipt_type,
+    0 AS purchase_id,
+    '' AS suplier
 FROM exit_receipts
 ORDER BY id;
 
