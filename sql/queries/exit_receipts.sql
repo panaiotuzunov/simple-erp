@@ -1,6 +1,6 @@
 -- name: CreateExitReceipt :one
 INSERT INTO exit_receipts (
-    created_at, updated_at, truck_reg, trailer_reg, gross, tare, grain_type
+    created_at, updated_at, truck_reg, trailer_reg, gross, tare, grain_type, sale_id
     )
 VALUES (
     NOW(),
@@ -9,7 +9,8 @@ VALUES (
     $2,
     $3,
     $4,
-    $5
+    $5,
+    $6
 )
 RETURNING *, (gross - tare)::NUMERIC(12,3) AS net;
 

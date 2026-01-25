@@ -23,3 +23,17 @@ func (cfg *apiConfig) HandlerCreatePurchase(writer http.ResponseWriter, req *htt
 	}
 	writeJSONResponse(writer, http.StatusCreated, purchase)
 }
+
+func (cfg *apiConfig) HandlerGetAllPurchases(writer http.ResponseWriter, req *http.Request) {
+	purchases, err := cfg.db.GetAllPurchases(req.Context())
+	if err != nil {
+		log.Printf("Error retrieving purchases: %v", err)
+		writeErrorResponse(writer, http.StatusInternalServerError, "Error retrieving purchases")
+		return
+	}
+	if len(purchases) == 0 {
+		writeJSONResponse(writer, http.StatusOK, []database.Purchase{})
+		return
+	}
+	writeJSONResponse(writer, http.StatusOK, purchases)
+}

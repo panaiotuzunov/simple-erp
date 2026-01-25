@@ -41,6 +41,10 @@ func main() {
 	mux.HandleFunc("GET /api/exit-receipts/{receiptID}", cfg.HandlerGetExitReceiptByID)
 	// purchases endpoint
 	mux.HandleFunc("POST /api/purchases/", cfg.HandlerCreatePurchase)
+	mux.HandleFunc("GET /api/purchases/", cfg.HandlerGetAllPurchases)
+	// sales endpoint
+	mux.HandleFunc("POST /api/sales/", cfg.HandlerCreateSale)
+	mux.HandleFunc("GET /api/sales/", cfg.HandlerGetAllSales)
 	// reports endpoint
 	mux.HandleFunc("GET /api/reports/movements/", cfg.HandlerReportMovements)
 	mux.HandleFunc("GET /api/reports/inventory/", cfg.HandlerReportInventory)

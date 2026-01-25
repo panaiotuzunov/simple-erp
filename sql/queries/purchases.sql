@@ -15,3 +15,6 @@ RETURNING *;
 -- name: GetPurchaseById :one
 SELECT * FROM purchases
 WHERE id = $1;
+
+-- name: GetAllPurchases :many
+SELECT * FROM purchases;
