@@ -11,7 +11,9 @@ SELECT
     (e.gross - e.tare)::NUMERIC(12,3) AS net,
     'entrance' AS receipt_type,
     e.purchase_id AS purchase_id,
-    p.suplier
+    p.suplier,
+    0 AS sale_id,
+    '' AS client
 FROM entrance_receipts e
 INNER JOIN purchases p
 ON e.purchase_id = p.id
@@ -19,19 +21,23 @@ ON e.purchase_id = p.id
 UNION ALL
 
 SELECT 
-    id,
-    created_at,
-    updated_at,
-    truck_reg,
-    trailer_reg,
-    (gross * -1)::NUMERIC(12,3) AS gross,
-    (tare * -1)::NUMERIC(12,3) AS tare,
-    grain_type,
-    -(gross - tare)::NUMERIC(12,3) AS net,
+    e.id,
+    e.created_at,
+    e.updated_at,
+    e.truck_reg,
+    e.trailer_reg,
+    (e.gross * -1)::NUMERIC(12,3) AS gross,
+    (e.tare * -1)::NUMERIC(12,3) AS tare,
+    e.grain_type,
+    -(e.gross - e.tare)::NUMERIC(12,3) AS net,
     'exit' AS receipt_type,
     0 AS purchase_id,
-    '' AS suplier
-FROM exit_receipts
+    '' AS suplier,
+    e.sale_id AS sale_id,
+    s.client AS client
+FROM exit_receipts e
+INNER JOIN sales s
+ON e.sale_id = s.id
 ORDER BY id;
 
 -- name: GetInventory :many
