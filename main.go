@@ -45,6 +45,9 @@ func main() {
 	// sales endpoint
 	mux.HandleFunc("POST /api/sales/", cfg.HandlerCreateSale)
 	mux.HandleFunc("GET /api/sales/", cfg.HandlerGetAllSales)
+	// transports endpoint
+	mux.HandleFunc("POST /api/transports/", cfg.HandlerCreateTransport)
+	mux.HandleFunc("GET /api/transports/", cfg.HandlerGetAllTransports)
 	// reports endpoint
 	mux.HandleFunc("GET /api/reports/movements/", cfg.HandlerReportMovements)
 	mux.HandleFunc("GET /api/reports/inventory/", cfg.HandlerReportInventory)

@@ -6,9 +6,8 @@ CREATE TABLE transports (
     truck_reg TEXT NOT NULL,
     trailer_reg TEXT NOT NULL,
     net NUMERIC(12, 3) NOT NULL,
-    grain_type TEXT NOT NULL,
-    sale_id INT REFERENCES sales(id),
-    purchase_id INT REFERENCES purchases(id)
+    sale_id INT NOT NULL REFERENCES sales(id),
+    purchase_id INT NOT NULL REFERENCES purchases(id)
 );
 
 -- +goose Down
