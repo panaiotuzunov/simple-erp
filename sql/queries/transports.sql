@@ -16,7 +16,7 @@ RETURNING *;
 -- name: GetAllTransports :many
 SELECT t.*, p.suplier, s.client
 FROM transports t
-LEFT JOIN purchases p
+INNER JOIN purchases p
 ON t.purchase_id = p.id
-LEFT JOIN sales s
+INNER JOIN sales s
 ON t.sale_id = s.id;
