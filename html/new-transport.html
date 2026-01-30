@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple ERP - New Transport</title>
+  <script src="frontend.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    header a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+    }
+    p.lead {
+      margin: 0;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 0.75rem;
+      margin-top: 1.25rem;
+      align-items: center;
+    }
+    label {
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    input {
+      padding: 0.35rem 0.45rem;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+    }
+    .actions {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button.secondary {
+      background: #f3f4f6;
+      color: #111827;
+      border-color: #d1d5db;
+    }
+    button:hover {
+      filter: brightness(0.98);
+    }
+    .message {
+      margin-top: 0.5rem;
+      min-height: 1.4rem;
+    }
+    .table-container {
+      margin-top: 0.75rem;
+      max-height: 220px;
+      overflow: auto;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+    }
+    .helper-note {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>New transport</h1>
+      <p class="lead">Create a transport linking a purchase and a sale.</p>
+    </div>
+    <nav>
+      <a href="new-documents.html">&larr; Back to documents</a> |
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+  <main>
+    <form id="transport-form">
+      <label for="transport-truck-reg">Truck reg</label>
+      <input id="transport-truck-reg" name="truck_reg" required />
+
+      <label for="transport-trailer-reg">Trailer reg</label>
+      <input id="transport-trailer-reg" name="trailer_reg" required />
+
+      <label for="transport-net">Net</label>
+      <input id="transport-net" name="net" type="number" step="0.001" required />
+
+      <label for="transport-sale-id">Sale ID</label>
+      <input id="transport-sale-id" name="sale_id" type="number" required />
+
+      <label for="transport-purchase-id">Purchase ID</label>
+      <input id="transport-purchase-id" name="purchase_id" type="number" required />
+    </form>
+    <p class="helper-note">
+      Purchase and sale must exist and use the same grain type; backend will enforce this and return errors otherwise.
+    </p>
+
+    <div class="actions">
+      <button type="button" id="transport-submit">Create transport</button>
+      <button type="button" class="secondary" id="transport-load">View all transports</button>
+    </div>
+    <div class="message" id="transport-message"></div>
+    <div class="table-container" id="transport-table"></div>
+  </main>
+
+  <script>
+    function formToJson(form) {
+      const data = {};
+      new FormData(form).forEach((value, key) => {
+        if (value === "") return;
+        if (!Number.isNaN(Number(value)) && form.elements[key].type === "number") {
+          data[key] = Number(value);
+        } else {
+          data[key] = value;
+        }
+      });
+      return data;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const transportForm = document.getElementById("transport-form");
+
+      document.getElementById("transport-submit").addEventListener("click", async () => {
+        const msg = document.getElementById("transport-message");
+        try {
+          const payload = formToJson(transportForm);
+          const res = await apiFetch("/api/transports/", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          showMessage(msg, "success", "Transport created with ID " + res.id);
+        } catch (err) {
+          showMessage(msg, "error", err.message || "Failed to create transport");
+        }
+      });
+
+      document.getElementById("transport-load").addEventListener("click", async () => {
+        const table = document.getElementById("transport-table");
+        try {
+          const rows = await apiFetch("/api/transports/");
+          renderTable(table, rows);
+        } catch (err) {
+          renderTable(table, []);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

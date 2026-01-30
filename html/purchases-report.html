@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple ERP - Purchases Report</title>
+  <script src="frontend.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    header a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+    }
+    p.lead {
+      margin: 0;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+    .message {
+      margin-top: 0.5rem;
+      min-height: 1.4rem;
+    }
+    .table-container {
+      margin-top: 0.75rem;
+      max-height: 400px;
+      overflow: auto;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Purchases report</h1>
+      <p class="lead">All purchase records with expedited receipts and transports.</p>
+    </div>
+    <nav>
+      <a href="reports.html">&larr; Back to reports</a> |
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+  <main>
+    <div class="message" id="purchases-message"></div>
+    <div class="table-container" id="purchases-table"></div>
+  </main>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      const msg = document.getElementById("purchases-message");
+      const table = document.getElementById("purchases-table");
+
+      showMessage(msg, "success", "Loading purchases...");
+      try {
+        const rows = await apiFetch("/api/purchases/");
+        renderTable(table, rows);
+        showMessage(msg, "success", "Loaded " + rows.length + " purchase rows.");
+      } catch (err) {
+        showMessage(msg, "error", err.message || "Failed to load purchases report");
+        renderTable(table, []);
+      }
+    });
+  </script>
+</body>
+</html>

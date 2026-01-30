@@ -30,7 +30,7 @@ func main() {
 		Addr:    ":8080",
 	}
 	// home page
-	mux.Handle("/", http.FileServer(http.Dir("./")))
+	mux.Handle("/", http.FileServer(http.Dir("./html")))
 	// etrance-receipts endpoint
 	mux.HandleFunc("POST /api/entrance-receipts/", cfg.HandlerCreateEntranceReceipt)
 	mux.HandleFunc("GET /api/entrance-receipts/", cfg.HandlerGetAllEntranceReceipts)

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple ERP - Reports</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    header a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+    }
+    p.lead {
+      margin: 0;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem 1.25rem 1.25rem;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+    .card small {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+    .card a {
+      align-self: flex-start;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+    }
+    .card a:hover {
+      filter: brightness(0.98);
+    }
+    .helper-note {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Reports</h1>
+      <p class="lead">View purchases, sales, movements, and inventory data.</p>
+    </div>
+    <nav>
+      <a href="index.html">&larr; Back to home</a>
+    </nav>
+  </header>
+  <main>
+    <p class="helper-note">
+      Choose which report you want to open. Each link takes you to a dedicated report page.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <h2>Purchases</h2>
+        <small>All purchase records with expedited receipts and transports.</small>
+        <a href="purchases-report.html">Open purchases report</a>
+      </div>
+      <div class="card">
+        <h2>Sales</h2>
+        <small>All sale records with expedited receipts and transports.</small>
+        <a href="sales-report.html">Open sales report</a>
+      </div>
+      <div class="card">
+        <h2>Movements</h2>
+        <small>Union of entrance and exit receipts with signed quantities.</small>
+        <a href="movements-report.html">Open movements report</a>
+      </div>
+      <div class="card">
+        <h2>Inventory</h2>
+        <small>Current inventory per grain type.</small>
+        <a href="inventory-report.html">Open inventory report</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

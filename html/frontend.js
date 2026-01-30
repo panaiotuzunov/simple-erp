@@ -108,4 +108,3 @@ function renderTable(container, rows) {
   table.appendChild(tbody);
   container.appendChild(table);
 }
-

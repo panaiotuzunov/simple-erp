@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple ERP - New Exit Receipt</title>
+  <script src="frontend.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #222;
+    }
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    header a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    header a:hover {
+      text-decoration: underline;
+    }
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+    }
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.5rem;
+    }
+    p.lead {
+      margin: 0;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 0.75rem;
+      margin-top: 1.25rem;
+      align-items: center;
+    }
+    label {
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    input, select {
+      padding: 0.35rem 0.45rem;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+    }
+    .actions {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button.secondary {
+      background: #f3f4f6;
+      color: #111827;
+      border-color: #d1d5db;
+    }
+    button:hover {
+      filter: brightness(0.98);
+    }
+    .message {
+      margin-top: 0.5rem;
+      min-height: 1.4rem;
+    }
+    .table-container {
+      margin-top: 0.75rem;
+      max-height: 220px;
+      overflow: auto;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+    }
+    .helper-note {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>New exit receipt</h1>
+      <p class="lead">Create an exit receipt linked to a sale.</p>
+    </div>
+    <nav>
+      <a href="new-documents.html">&larr; Back to documents</a> |
+      <a href="index.html">Home</a>
+    </nav>
+  </header>
+  <main>
+    <form id="exit-form">
+      <label for="exit-truck-reg">Truck reg</label>
+      <input id="exit-truck-reg" name="truck_reg" required />
+
+      <label for="exit-trailer-reg">Trailer reg</label>
+      <input id="exit-trailer-reg" name="trailer_reg" required />
+
+      <label for="exit-gross">Gross</label>
+      <input id="exit-gross" name="gross" type="number" step="0.001" required />
+
+      <label for="exit-tare">Tare</label>
+      <input id="exit-tare" name="tare" type="number" step="0.001" required />
+
+      <label for="exit-grain-type">Grain type</label>
+      <select id="exit-grain-type" name="grain_type" required>
+        <option value="">Select grain</option>
+        <option value="wheat">wheat</option>
+        <option value="barley">barley</option>
+        <option value="corn">corn</option>
+        <option value="sunflower">sunflower</option>
+        <option value="canola">canola</option>
+      </select>
+
+      <label for="exit-sale-id">Sale ID</label>
+      <input id="exit-sale-id" name="sale_id" type="number" required />
+    </form>
+    <p class="helper-note">
+      Sale ID must reference an existing sale; grain type must match that sale.
+    </p>
+
+    <div class="actions">
+      <button type="button" id="exit-submit">Create exit receipt</button>
+      <button type="button" class="secondary" id="exit-load">View all exit receipts</button>
+    </div>
+    <div class="message" id="exit-message"></div>
+    <div class="table-container" id="exit-table"></div>
+  </main>
+
+  <script>
+    function formToJson(form) {
+      const data = {};
+      new FormData(form).forEach((value, key) => {
+        if (value === "") return;
+        if (!Number.isNaN(Number(value)) && form.elements[key].type === "number") {
+          data[key] = Number(value);
+        } else {
+          data[key] = value;
+        }
+      });
+      return data;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const exitForm = document.getElementById("exit-form");
+
+      document.getElementById("exit-submit").addEventListener("click", async () => {
+        const msg = document.getElementById("exit-message");
+        try {
+          const payload = formToJson(exitForm);
+          const res = await apiFetch("/api/exit-receipts/", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          showMessage(
+            msg,
+            "success",
+            "Exit receipt created with ID " + res.id + " (net " + (res.net ?? "") + ")"
+          );
+        } catch (err) {
+          showMessage(msg, "error", err.message || "Failed to create exit receipt");
+        }
+      });
+
+      document.getElementById("exit-load").addEventListener("click", async () => {
+        const table = document.getElementById("exit-table");
+        try {
+          const rows = await apiFetch("/api/exit-receipts/");
+          renderTable(table, rows);
+        } catch (err) {
+          renderTable(table, []);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
