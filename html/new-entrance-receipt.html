@@ -3,7 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <title>Simple ERP - New Entrance Receipt</title>
-  <script src="frontend.js"></script>
+  <script>
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...options,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+      return res.json();
+    }
+
+    function showMessage(el, type, message) {
+      el.textContent = message;
+      el.style.color = type === "error" ? "red" : "green";
+    }
+
+    function renderTable(container, rows) {
+      container.innerHTML = "";
+      if (rows.length === 0) {
+        container.textContent = "No entrance receipts found.";
+        return;
+      }
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      const headers = Object.keys(rows[0]);
+      const headerRow = document.createElement("tr");
+      headers.forEach(headerText => {
+        const th = document.createElement("th");
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      rows.forEach(rowData => {
+        const tr = document.createElement("tr");
+        tr.dataset.id = rowData.id; // Store ID for click handling
+        headers.forEach(headerText => {
+          const td = document.createElement("td");
+          td.textContent = rowData[headerText];
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    function formToJson(form, excludeReadOnly = true) {
+      const data = {};
+      new FormData(form).forEach((value, key) => {
+        const element = form.elements[key];
+        if (excludeReadOnly && element && element.readOnly) {
+          return;
+        }
+
+        if (value === "") return;
+        if (!Number.isNaN(Number(value)) && element.type === "number") {
+          data[key] = Number(value);
+        } else {
+          data[key] = value;
+        }
+      });
+      return data;
+    }
+
+    function populateForm(form, data) {
+      for (const key in data) {
+        const element = form.elements[key];
+        if (element) {
+          element.value = data[key];
+        }
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const entranceForm = document.getElementById("entrance-form");
+
+      document.getElementById("entrance-submit").addEventListener("click", async () => {
+        const msg = document.getElementById("entrance-message");
+        try {
+          // If the ID field has a value, it means we are updating an existing receipt
+          const receiptId = entranceForm.elements["id"].value;
+          let res;
+          if (receiptId) {
+            const payload = formToJson(entranceForm, true); // Exclude read-only fields for update
+            res = await apiFetch(`/api/entrance-receipts/${receiptId}`, {
+              method: "PUT", // Assuming PUT for updates
+              body: JSON.stringify(payload)
+            });
+            showMessage(msg, "success", "Entrance receipt with ID " + res.id + " updated successfully (net " + (res.net ?? "") + ")");
+          } else {
+            const payload = formToJson(entranceForm, true); // Exclude read-only fields for creation
+            res = await apiFetch("/api/entrance-receipts/", {
+              method: "POST",
+              body: JSON.stringify(payload)
+            });
+            showMessage(msg, "success", "Entrance receipt created with ID " + res.id + " (net " + (res.net ?? "") + ")");
+          }
+          // Optionally clear form or repopulate with new data
+          entranceForm.reset();
+          populateForm(entranceForm, res); // Populate with the returned data
+        } catch (err) {
+          showMessage(msg, "error", err.message || "Failed to process entrance receipt");
+        }
+      });
+
+      document.getElementById("entrance-load").addEventListener("click", async () => {
+        const tableContainer = document.getElementById("entrance-table");
+        const msg = document.getElementById("entrance-message");
+        try {
+          const rows = await apiFetch("/api/entrance-receipts/");
+          renderTable(tableContainer, rows);
+
+          tableContainer.querySelectorAll("tbody tr").forEach(row => {
+            row.addEventListener("click", async () => {
+              const receiptId = row.dataset.id;
+              try {
+                const receipt = await apiFetch(`/api/entrance-receipts/${receiptId}`);
+                populateForm(entranceForm, receipt);
+                showMessage(msg, "success", "Loaded entrance receipt ID: " + receipt.id);
+              } catch (err) {
+                showMessage(msg, "error", err.message || "Failed to load receipt details");
+              }
+            });
+          });
+          showMessage(msg, "success", "All entrance receipts loaded. Click on a row to edit.");
+        } catch (err) {
+          renderTable(tableContainer, []);
+          showMessage(msg, "error", err.message || "Failed to load entrance receipts");
+        }
+      });
+    });
+  </script>
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -70,6 +210,9 @@
       border-color: #2563eb;
       box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
     }
+    input[readonly] {
+      background-color: #e9ecef;
+    }
     .actions {
       margin-top: 0.75rem;
       display: flex;
@@ -105,6 +248,27 @@
       border: 1px solid #e5e7eb;
       background: #fff;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      color: #374151;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background-color: #f9fafb;
+      cursor: pointer;
+    }
     .helper-note {
       font-size: 0.8rem;
       color: #6b7280;
@@ -124,7 +288,15 @@
     </nav>
   </header>
   <main>
-    <form id="entrance-form">
+        <form id="entrance-form">
+      <label for="entrance-id">ID</label>
+      <input id="entrance-id" name="id" readonly />
+
+      <label for="entrance-created-at">Created At</label>
+      <input id="entrance-created-at" name="created_at" readonly />
+
+      <label for="entrance-updated-at">Updated At</label>
+      <input id="entrance-updated-at" name="updated_at" readonly />
       <label for="entrance-truck-reg">Truck reg</label>
       <input id="entrance-truck-reg" name="truck_reg" required />
 
