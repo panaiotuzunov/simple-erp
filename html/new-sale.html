@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Simple ERP - New Sale</title>
-  <script src="frontend.js"></script>
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -70,6 +69,9 @@
       border-color: #2563eb;
       box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
     }
+    input[readonly] {
+      background-color: #e9ecef;
+    }
     .actions {
       margin-top: 0.75rem;
       display: flex;
@@ -105,6 +107,27 @@
       border: 1px solid #e5e7eb;
       background: #fff;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    th {
+      background-color: #f3f4f6;
+      font-weight: 600;
+      color: #374151;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background-color: #f9fafb;
+      cursor: pointer;
+    }
     .helper-note {
       font-size: 0.8rem;
       color: #6b7280;
@@ -125,6 +148,15 @@
   </header>
   <main>
     <form id="sale-form">
+      <label for="sale-id">ID</label>
+      <input id="sale-id" name="id" readonly />
+
+      <label for="sale-created-at">Created At</label>
+      <input id="sale-created-at" name="created_at" readonly />
+
+      <label for="sale-updated-at">Updated At</label>
+      <input id="sale-updated-at" name="updated_at" readonly />
+
       <label for="sale-client">Client</label>
       <input id="sale-client" name="client" required />
 
@@ -157,11 +189,81 @@
   </main>
 
   <script>
-    function formToJson(form) {
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...options,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+      return res.json();
+    }
+
+    function showMessage(el, type, message) {
+      el.textContent = message;
+      el.style.color = type === "error" ? "red" : "green";
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return "";
+      const date = new Date(timestamp);
+      return date.toISOString().split('T')[0];
+    }
+
+    function renderTable(container, rows) {
+      container.innerHTML = "";
+      if (rows.length === 0) {
+        container.textContent = "No sales found.";
+        return;
+      }
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const tbody = document.createElement("tbody");
+
+      const headers = Object.keys(rows[0]);
+      const headerRow = document.createElement("tr");
+      headers.forEach(headerText => {
+        const th = document.createElement("th");
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      rows.forEach(rowData => {
+        const tr = document.createElement("tr");
+        tr.dataset.id = rowData.id; // Store ID for click handling
+        headers.forEach(headerText => {
+          const td = document.createElement("td");
+          // Format dates for display
+          if (headerText === "created_at" || headerText === "updated_at") {
+            td.textContent = formatDate(rowData[headerText]);
+          } else {
+            td.textContent = rowData[headerText];
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    function formToJson(form, excludeReadOnly = true) {
       const data = {};
       new FormData(form).forEach((value, key) => {
+        const element = form.elements[key];
+        if (excludeReadOnly && element && element.readOnly) {
+          return;
+        }
+
         if (value === "") return;
-        if (!Number.isNaN(Number(value)) && form.elements[key].type === "number") {
+        if (!Number.isNaN(Number(value)) && element.type === "number") {
           data[key] = Number(value);
         } else {
           data[key] = value;
@@ -170,34 +272,75 @@
       return data;
     }
 
+    function populateForm(form, data) {
+      for (const key in data) {
+        const element = form.elements[key];
+        if (element) {
+          if (key === "created_at" || key === "updated_at") {
+            element.value = formatDate(data[key]);
+          } else {
+            element.value = data[key];
+          }
+        }
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       const saleForm = document.getElementById("sale-form");
 
       document.getElementById("sale-submit").addEventListener("click", async () => {
         const msg = document.getElementById("sale-message");
         try {
-          const payload = formToJson(saleForm);
-          const res = await apiFetch("/api/sales/", {
-            method: "POST",
-            body: JSON.stringify(payload)
-          });
-          showMessage(msg, "success", "Sale created with ID " + res.id);
+          const saleId = saleForm.elements["id"].value;
+          let res;
+          if (saleId) {
+            const payload = formToJson(saleForm, true);
+            res = await apiFetch(`/api/sales/${saleId}`, {
+              method: "PUT",
+              body: JSON.stringify(payload)
+            });
+            showMessage(msg, "success", "Sale with ID " + res.id + " updated successfully.");
+          } else {
+            const payload = formToJson(saleForm, true);
+            res = await apiFetch("/api/sales/", {
+              method: "POST",
+              body: JSON.stringify(payload)
+            });
+            showMessage(msg, "success", "Sale created with ID " + res.id);
+          }
+          saleForm.reset();
+          populateForm(saleForm, res);
         } catch (err) {
-          showMessage(msg, "error", err.message || "Failed to create sale");
+          showMessage(msg, "error", err.message || "Failed to process sale");
         }
       });
 
       document.getElementById("sale-load").addEventListener("click", async () => {
-        const table = document.getElementById("sale-table");
+        const tableContainer = document.getElementById("sale-table");
+        const msg = document.getElementById("sale-message");
         try {
           const rows = await apiFetch("/api/sales/");
-          renderTable(table, rows);
+          renderTable(tableContainer, rows);
+
+          tableContainer.querySelectorAll("tbody tr").forEach(row => {
+            row.addEventListener("click", async () => {
+              const saleId = row.dataset.id;
+              try {
+                const sale = await apiFetch(`/api/sales/${saleId}`);
+                populateForm(saleForm, sale);
+                showMessage(msg, "success", "Loaded sale ID: " + sale.id);
+              } catch (err) {
+                showMessage(msg, "error", err.message || "Failed to load sale details");
+              }
+            });
+          });
+          showMessage(msg, "success", "All sales loaded. Click on a row to edit.");
         } catch (err) {
-          renderTable(table, []);
+          renderTable(tableContainer, []);
+          showMessage(msg, "error", err.message || "Failed to load sales");
         }
       });
     });
   </script>
 </body>
 </html>
-
