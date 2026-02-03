@@ -4,21 +4,16 @@ CREATE TABLE companies (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     vat_number TEXT NOT NULL UNIQUE,
-    CONSTRAINT valid_vat CHECK (vat_number ~ '^[0-9]{10}$'),
+    CONSTRAINT valid_vat CHECK (vat_number ~ '^[0-9]{9}$'),
     name TEXT NOT NULL,
     address TEXT NOT NULL
 );
 
 ALTER TABLE entrance_receipts ADD COLUMN company_id INT REFERENCES companies(id);
-
 ALTER TABLE exit_receipts ADD COLUMN company_id INT REFERENCES companies(id);
-
 ALTER TABLE purchases ADD COLUMN company_id INT REFERENCES companies(id);
-
 ALTER TABLE sales ADD COLUMN company_id INT REFERENCES companies(id);
-
 ALTER TABLE transports ADD COLUMN suplier_id INT REFERENCES companies(id);
-
 ALTER TABLE transports ADD COLUMN client_id INT REFERENCES companies(id);
 
 -- +goose Down
