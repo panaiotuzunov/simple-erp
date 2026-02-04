@@ -1,6 +1,6 @@
 -- name: CreateTransport :one
 INSERT INTO transports (
-    created_at, updated_at, truck_reg, trailer_reg, net, sale_id, purchase_id
+    created_at, updated_at, truck_reg, trailer_reg, net, sale_id, purchase_id, suplier_id, client_id
     )
 VALUES (
     NOW(),
@@ -9,7 +9,9 @@ VALUES (
     $2,
     $3,
     $4,
-    $5
+    $5,
+    $6,
+    $7
 )
 RETURNING *;
 

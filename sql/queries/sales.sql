@@ -1,6 +1,6 @@
 -- name: CreateSale :one
 INSERT INTO sales (
-    created_at, updated_at, client, price, quantity, grain_type 
+    created_at, updated_at, company_id, price, quantity, grain_type 
     )
 VALUES (
     NOW(),
