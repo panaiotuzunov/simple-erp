@@ -1,6 +1,6 @@
 -- name: CreatePurchase :one
 INSERT INTO purchases (
-    created_at, updated_at, company_id, price, quantity, grain_type 
+    created_at, updated_at, suplier_id, price, quantity, grain_type 
     )
 VALUES (
     NOW(),

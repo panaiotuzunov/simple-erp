@@ -5,20 +5,19 @@ CREATE TABLE companies (
     updated_at TIMESTAMP NOT NULL,
     vat_number TEXT NOT NULL UNIQUE,
     CONSTRAINT valid_vat CHECK (vat_number ~ '^[0-9]{9}$'),
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     address TEXT NOT NULL
 );
 
-ALTER TABLE entrance_receipts ADD COLUMN company_id INT REFERENCES companies(id);
-ALTER TABLE exit_receipts ADD COLUMN company_id INT REFERENCES companies(id);
-ALTER TABLE purchases ADD COLUMN company_id INT REFERENCES companies(id);
-ALTER TABLE sales ADD COLUMN company_id INT REFERENCES companies(id);
-ALTER TABLE transports ADD COLUMN suplier_id INT REFERENCES companies(id);
-ALTER TABLE transports ADD COLUMN client_id INT REFERENCES companies(id);
+ALTER TABLE purchases ADD COLUMN suplier_id INT NOT NULL REFERENCES companies(id);
+ALTER TABLE sales ADD COLUMN client_id INT NOT NULL REFERENCES companies(id);
+ALTER TABLE transports ADD COLUMN suplier_id INT NOT NULL REFERENCES companies(id);
+ALTER TABLE transports ADD COLUMN client_id INT NOT NULL REFERENCES companies(id);
+ALTER TABLE sales DROP column client;
+ALTER TABLE purchases DROP column suplier;
+
 
 -- +goose Down
-ALTER TABLE entrance_receipts DROP COLUMN company_id;
-ALTER TABLE exit_receipts DROP COLUMN company_id;
 ALTER TABLE purchases DROP COLUMN company_id;
 ALTER TABLE sales DROP COLUMN company_id;
 ALTER TABLE transports DROP COLUMN suplier_id;
