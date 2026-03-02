@@ -18,8 +18,8 @@ ALTER TABLE purchases DROP column suplier;
 
 
 -- +goose Down
-ALTER TABLE purchases DROP COLUMN company_id;
-ALTER TABLE sales DROP COLUMN company_id;
+ALTER TABLE purchases DROP COLUMN suplier_id;
+ALTER TABLE sales DROP COLUMN client_id;
 ALTER TABLE transports DROP COLUMN suplier_id;
 ALTER TABLE transports DROP COLUMN client_id;
 DROP TABLE companies;

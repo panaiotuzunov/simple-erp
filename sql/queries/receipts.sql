@@ -1,5 +1,5 @@
 -- name: GetAllReceiptsUnion :many
-SELECT 
+SELECT
     e.id,
     e.created_at,
     e.updated_at,
@@ -11,16 +11,16 @@ SELECT
     (e.gross - e.tare)::NUMERIC(12,3) AS net,
     'entrance' AS receipt_type,
     e.purchase_id AS purchase_id,
-    p.suplier,
+    c.name AS suplier,
     0 AS sale_id,
     '' AS client
 FROM entrance_receipts e
-INNER JOIN purchases p
-ON e.purchase_id = p.id
+INNER JOIN purchases p ON e.purchase_id = p.id
+INNER JOIN companies c ON p.suplier_id = c.id
 
 UNION ALL
 
-SELECT 
+SELECT
     e.id,
     e.created_at,
     e.updated_at,
@@ -34,10 +34,10 @@ SELECT
     0 AS purchase_id,
     '' AS suplier,
     e.sale_id AS sale_id,
-    s.client AS client
+    sc.name AS client
 FROM exit_receipts e
-INNER JOIN sales s
-ON e.sale_id = s.id
+INNER JOIN sales s ON e.sale_id = s.id
+INNER JOIN companies sc ON s.client_id = sc.id
 ORDER BY id;
 
 -- name: GetInventory :many

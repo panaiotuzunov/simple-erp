@@ -17,10 +17,10 @@ RETURNING *, (gross - tare)::NUMERIC(12,3) AS net;
 -- name: GetAllEntranceReceipts :many
 SELECT e.*,
     (e.gross - e.tare)::NUMERIC(12,3) AS net,
-    p.suplier AS suplier
+    c.name AS suplier
 FROM entrance_receipts e
-INNER JOIN purchases p
-ON e.purchase_id = p.id;
+INNER JOIN purchases p ON e.purchase_id = p.id
+INNER JOIN companies c ON p.suplier_id = c.id;
 
 -- name: GetEntranceReceiptByID :one
 SELECT *, (gross - tare)::NUMERIC(12,3) AS net 
